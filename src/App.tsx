@@ -3,20 +3,17 @@ import "./App.css";
 import Snake from "./Snake";
 import display from "./display";
 import React, { useEffect } from "react";
+import CanvasWorldView from "./CanvasWorldView";
+import GameController from "./GameController";
+import WorldModel from "./WorldModel";
 
 export default function App() {
   // Add Snake Tests with display below
   useEffect(() => {
-    const redSnake = new Snake(0, 0);
-    redSnake.move(5);
-    redSnake.turnRight();
-    redSnake.move(3);
-    const scalingFactor = 10; // Choose your scaling factor
-    document.getElementById("output")!.innerText = "OUTPUT:\n";
-    display(
-      "The red snake is at " + redSnake.position.x + ", " + redSnake.position.y,
-    );
-    display("The red snake is facing " + redSnake.direction);
+    const theSnake = new Snake(0, 0);
+    const theWorld = new WorldModel(theSnake, 10, 10);
+    const canvas = new CanvasWorldView(5);
+    const gameController = new GameController(theWorld);
   }, []);
   return (
     <div className="App">

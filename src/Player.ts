@@ -1,7 +1,7 @@
 import SnakeController from "./SnakeController";
 
 abstract class Player {
-  sc: SnakeController;
+  protected sc: SnakeController;
   constructor(sc: SnakeController) {
     this.sc = sc;
   }
