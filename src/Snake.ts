@@ -1,69 +1,176 @@
-import display from "./display";
+import Collidable from "./Collidable";
 import Point from "./Point";
 
-// place your code on line 5 above the export statement below
-// >1 ^2 <3 v4
-class Snake {
-  private currentDirection: number;
+// ^ 1  < 2  \/ 3  > 4
+
+class Snake implements Collidable {
+  public currentParts: Point[];
   private currentPosition: Point;
-  constructor(x: number = 0, y: number = 0) {
-    this.currentDirection = 1;
-    this.currentPosition = new Point(x, y);
-  }
-  move(numberOfSquares: number) {
-    if (this.currentDirection === 1) {
-      this.currentPosition = new Point(
-        this.currentPosition.x + numberOfSquares,
-        this.currentPosition.y,
-      );
-    } else if (this.currentDirection === 2) {
-      this.currentPosition = new Point(
-        this.currentPosition.x,
-        this.currentPosition.y + numberOfSquares,
-      );
-    } else if (this.currentDirection === 3) {
-      this.currentPosition = new Point(
-        this.currentPosition.x - numberOfSquares,
-        this.currentPosition.y,
-      );
-    } else {
-      this.currentPosition = new Point(
-        this.currentPosition.x,
-        this.currentPosition.y - numberOfSquares,
-      );
+  private currentDirection: string;
+  public color: string;
+  private startingPosition = new Point(0, 0);
+
+  private isCurrentlyActive: boolean;
+
+  constructor(
+    color: string,
+    startingPosition: Point = new Point(0, 0),
+    direction: string = "right",
+    size: number,
+    isCurrentlyActive = true,
+  ) {
+    this.isCurrentlyActive = isCurrentlyActive;
+    this.color = color;
+    this.startingPosition = startingPosition;
+    this.currentPosition = new Point(startingPosition.x, startingPosition.y);
+    this.currentParts = [];
+    this.currentDirection = direction;
+
+    for (let i = 0; i < size; i++) {
+      let part;
+      switch (direction) {
+        case "right":
+          part = new Point(startingPosition.x - i, startingPosition.y);
+          break;
+        case "left":
+          part = new Point(startingPosition.x + i, startingPosition.y);
+          break;
+        case "up":
+          part = new Point(startingPosition.x, startingPosition.y + i);
+          break;
+        case "down":
+          part = new Point(startingPosition.x, startingPosition.y - i);
+          break;
+        default:
+          part = new Point(startingPosition.x - i, startingPosition.y);
+          break;
+      }
+      this.currentParts.push(part);
     }
   }
+  public grow() {
+    const tail = this.currentParts[this.currentParts.length - 1];
+    let newPoint;
 
-  turnLeft() {
-    if (this.currentDirection === 1) {
-      this.currentDirection = 2;
-    } else if (this.currentDirection === 2) {
-      this.currentDirection = 3;
-    } else if (this.currentDirection === 3) {
-      this.currentDirection = 4;
-    } else {
-      this.currentDirection = 1;
+    switch (this.direction) {
+      case "right":
+        newPoint = new Point(tail.x + 1, tail.y);
+        break;
+      case "left":
+        newPoint = new Point(tail.x - 1, tail.y);
+        break;
+      case "up":
+        newPoint = new Point(tail.x, tail.y - 1);
+        break;
+      case "down":
+        newPoint = new Point(tail.x, tail.y + 1);
+        break;
+      default:
+        newPoint = new Point(tail.x - 1, tail.y);
+        break;
     }
+
+    this.currentParts.push(newPoint);
   }
 
-  turnRight() {
-    if (this.currentDirection === 1) {
-      this.currentDirection = 4;
-    } else if (this.currentDirection === 4) {
-      this.currentDirection = 3;
-    } else if (this.currentDirection === 3) {
-      this.currentDirection = 2;
-    } else {
-      this.currentDirection = 1;
-    }
+  public get direction(): string {
+    return this.currentDirection;
   }
 
-  get position() {
+  public get head(): Point {
+    return this.currentParts[0];
+  }
+
+  public get position(): Point {
     return this.currentPosition;
   }
 
-  get direction() {
-    return this.currentDirection;
+  public setPosition(newPosition: Point) {
+    this.currentPosition = newPosition;
+  }
+
+  public setDirection(newDirection: string) {
+    this.currentDirection = newDirection;
+  }
+
+  public get parts(): Point[] {
+    return this.currentParts;
+  }
+  public get type(): string {
+    return "Snake";
+  }
+  public get size(): number {
+    return this.currentParts.length;
+  }
+  public update() {
+    this.move(1);
+  }
+  public die() {
+    this.isCurrentlyActive = false;
+  }
+
+  public set direction(newDirection: string) {
+    this.currentDirection = newDirection;
+  }
+
+  public didCollideWithObject(other: Collidable): boolean {
+    if (!(other instanceof Snake)) {
+      return this.position.equals(other.position);
+    } else {
+      const otherSnake = other as Snake;
+      if (this === otherSnake) {
+        return this.currentParts
+          .slice(1)
+          .some((part) => part.equals(this.head));
+      } else {
+        return otherSnake.currentParts.some((part) => part.equals(this.head));
+      }
+    }
+  }
+  public move(squares: number) {
+    for (let i = this.currentParts.length - 1; i > 0; i--) {
+      this.currentParts[i] = this.currentParts[i - 1];
+    }
+    let head = this.currentParts[0];
+    let newX = head.x;
+    let newY = head.y;
+    if (this.direction === "right") {
+      newX += squares;
+    } else if (this.direction === "left") {
+      newX -= squares;
+    } else if (this.direction === "up") {
+      newY -= squares;
+    } else if (this.direction === "down") {
+      newY += squares;
+    }
+    this.currentPosition = new Point(newX, newY);
+    this.currentParts[0] = this.currentPosition;
+  }
+
+  public turnRight() {
+    if (this.currentDirection === "right") {
+      this.currentDirection = "down";
+    } else if (this.currentDirection === "down") {
+      this.currentDirection = "left";
+    } else if (this.currentDirection === "left") {
+      this.currentDirection = "up";
+    } else this.currentDirection = "right";
+  }
+  //turns the snake to the left
+  public turnLeft() {
+    if (this.currentDirection === "right") {
+      this.currentDirection = "up";
+    } else if (this.currentDirection === "up") {
+      this.currentDirection = "left";
+    } else if (this.currentDirection === "left") {
+      this.currentDirection = "down";
+    } else this.currentDirection = "right";
+  }
+  public turnDown() {
+    this.currentDirection = "down";
+  }
+  public turnUp() {
+    this.currentDirection = "up";
   }
 }
 export default Snake;

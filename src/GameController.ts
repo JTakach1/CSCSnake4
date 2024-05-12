@@ -3,8 +3,8 @@ import WorldModel from "./WorldModel";
 
 class GameController {
   private world: WorldModel;
-  private player1: Player | null;
-  private player2: Player | null;
+  player1: Player | null;
+  player2: Player | null;
 
   constructor(world: WorldModel) {
     this.world = world;
@@ -22,6 +22,7 @@ class GameController {
 
   run() {
     let lastTime = 0;
+
     const updateFrame = () => {
       if (this.player1 && this.player2) {
         this.player1.makeTurn();

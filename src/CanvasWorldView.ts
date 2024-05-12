@@ -12,26 +12,37 @@ class CanvasWorldView implements IWorldView {
     this.context = this.worldCanvas.getContext("2d")!;
     document.body.appendChild(this.worldCanvas);
   }
-  display(worldModel: WorldModel): void {
-    this.worldCanvas.width = worldModel.worldWidth * this.scalingFactor;
-    this.worldCanvas.height = worldModel.worldHeight * this.scalingFactor;
+  public display(model: WorldModel): void {
+    this.worldCanvas.width = model.WorldWidth * this.scalingFactor;
+    this.worldCanvas.height = model.WorldHeight * this.scalingFactor;
+
     this.context.clearRect(
       0,
       0,
       this.worldCanvas.width,
       this.worldCanvas.height,
     );
-    const snake = worldModel.theSnake;
-    if (snake) {
-      this.context.fillStyle = "green"; // Color of the snake
-      // Draw a rectangle representing the snake
-      this.context.fillRect(
-        snake.position.x * this.scalingFactor,
-        snake.position.y * this.scalingFactor,
-        this.scalingFactor,
-        this.scalingFactor,
-      );
-    }
+    this.context.fillStyle = "black";
+
+    this.context.fillRect(
+      0,
+      0,
+      this.worldCanvas.width,
+      this.worldCanvas.height,
+    );
+
+    model.snake.forEach((snake) => {
+      // Iterate over all parts of the snake
+      snake.parts.forEach((part) => {
+        // Calculate the position of the part on the canvas
+        const x = part.x * this.scalingFactor;
+        const y = part.y * this.scalingFactor;
+
+        // Draw the part of the snake
+        this.context.fillStyle = snake.color; // Assuming each snake has a color property
+        this.context.fillRect(x, y, this.scalingFactor, this.scalingFactor);
+      });
+    });
   }
 }
 

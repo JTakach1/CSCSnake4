@@ -9,6 +9,9 @@ class Point {
     this.xcoord = xcoord;
     this.ycoord = ycoord;
   }
+  public equals(other: Point): boolean {
+    return this.x === other.x && this.y === other.y;
+  }
   get x(): number {
     return this.xcoord;
   }
